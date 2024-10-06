@@ -15,14 +15,42 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for debug purposes
+
     - name: Use Node.js 20
       uses: actions/setup-node@v4
       with:
         node-version: 20
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+
+    - name: Debug Node.js and npm versions
+      run: |
+        echo "Node.js version: $(node -v)"
+        echo "npm version: $(npm -v)"
+        echo "Current working directory: $(pwd)"
+        echo "List files in the working directory:"
+        ls -la
+
+    - name: Install dependencies
+      run: |
+        echo "Running npm install..."
+        npm install
+
+    - name: Directory after install
+      run: |
+        echo "List files after npm install:"
+        ls -la
+
+    - name: Build project
+      run: |
+        echo "Running npm run build..."
+        npm run build --if-present
+
+    - name: Test project
+      run: |
+        echo "Running npm test..."
+        npm test
 
   publish:
     runs-on: ubuntu-latest
