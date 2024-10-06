@@ -52,24 +52,6 @@ jobs:
         echo "List files in dist directory after build:"
         ls -la dist
 
-  publish:
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'release' && github.event.action == 'published'  # Only trigger on published release
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-        fetch-depth: 0
-    - name: Debug GITHUB_EVENT
-      run: |
-        echo "Event: ${{ toJson(github.event) }}"
-
-    - name: List files in dist directory before publishing
-      run: |
-        echo "List files in dist directory before publishing:"
-        ls -la dist
-
     - name: Configure Git
       run: |
         git config --global user.name "GitHub Actions"
