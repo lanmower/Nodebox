@@ -1,7 +1,7 @@
 import { Nodebox } from "@codesandbox/nodebox";
 
 const previewIframe = document.getElementById("preview-iframe");
-
+console.log('test')
 async function init() {
   // Create a new Nodebox runtime to evaluate Node.js code.
   const runtime = new Nodebox({
