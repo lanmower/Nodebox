@@ -42,10 +42,10 @@ jobs:
         echo "List files after npm install:"
         ls -la
 
-    - name: Build project
+    - name: Build project with relative base
       run: |
         echo "Running npm run build..."
-        npm run build --if-present
+        npm run build --if-present -- --base=./
 
     - name: List dist directory
       run: |
