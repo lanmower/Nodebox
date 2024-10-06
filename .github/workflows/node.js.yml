@@ -50,9 +50,13 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'release' && github.event.action == 'published'  # Run on published releases
+    if: startsWith(github.event.action, 'published')  # Ensure this runs only for published releases
     steps:
     - uses: actions/checkout@v4
+    - name: Debug GITHUB_EVENT
+      run: |
+        echo "Event: ${{ toJson(github.event) }}"
+
     - name: Publish to GitHub Releases
       if: github.event.release.tag_name  # Ensure a tag is present
       uses: softprops/action-gh-release@v1
