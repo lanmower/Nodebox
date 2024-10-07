@@ -5,22 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
     
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+      #app {
+        display: flex;
+        height: 100vh;
+      }
+      #editor {
+        flex: 1;
+        padding: 20px;
+        border-right: 1px solid #ccc;
+        background-color: #f9f9f9;
+      }
+      #preview {
+        flex: 2;
+        padding: 20px;
+      }
+      #preview-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+    </style>
     <script type="module" crossorigin src="./assets/index-ad70fb71.js"></script>
     <link rel="stylesheet" href="./assets/index-8a043bf9.css">
   </head>
   <body>
     <div id="app">
-      <h2>Next.js preview</h2>
-      <p>
-        Below, you can see an actual Next.js project running directly in your
-        browser.
-      </p>
-      <iframe id="nodebox-iframe" style="display:none"></iframe>
-      <iframe id="preview-iframe" width="100%" height="250"></iframe>
-      
-      <p align="center">Learn more about <a href="https://github.com/codesandbox/nodebox-runtime">Nodebox</a>.</p>
+      <div id="editor">
+        <h2>Code Editor</h2>
+        <textarea rows="20" style="width: 100%;"></textarea>
+      </div>
+      <div id="preview">
+        <h2>Next.js Preview</h2>
+        <p>
+          Below, you can see an actual Next.js project running directly in your
+          browser.
+        </p>
+        <iframe id="preview-iframe"></iframe>
+      </div>
     </div>
     
+    <p align="center">
+      Learn more about <a href="https://github.com/codesandbox/nodebox-runtime">Nodebox</a>.
+    </p>
+
     
   </body>
 </html>
