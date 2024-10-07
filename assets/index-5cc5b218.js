@@ -7,14 +7,14 @@ export default function Homepage({ name }) {
       <h1>Hello, {name}</h1>
       <p>The name "{name}" has been received from server-side props.</p>
     </div>
-  )
+  );
 }
 
 export function getServerSideProps() {
   return {
     props: {
-      name: 'John'
-    }
-  }
+      name: 'John',
+    };
+  };
 }
         `};async function $e(){const w=new H.Nodebox({iframe:document.getElementById("nodebox-iframe")});await w.connect(),await w.fs.init(A),Y(),await Je();const j=await w.shell.create().runCommand("next",["dev"]),x=await w.preview.getByShellId(j.id);qe.setAttribute("src",x.url)}function Y(){oe.innerHTML="",Object.keys(A).forEach(w=>{const M=document.createElement("li");M.textContent=w,M.onclick=()=>de(w),oe.appendChild(M)})}function de(w){D=w,B.setValue(A[w])}Ve.onclick=()=>{const w=ce.value.trim();w&&(A[w]="",Y(),ce.value="")};Ge.onclick=()=>{A[D]&&(delete A[D],Y(),D=Object.keys(A)[0]||"",D?de(D):B.setValue(""))};let B;async function Je(){require.config({paths:{vs:"https://unpkg.com/monaco-editor/min/vs"}}),require(["vs/editor/editor.main"],function(){B=monaco.editor.create(Ue,{value:A[D],language:"javascript"}),B.onDidChangeModelContent(()=>{A[D]=B.getValue()})})}$e();
