@@ -29,13 +29,14 @@
         height: 100%;
         border: none;
       }
+      #monaco-editor {
+        height: 90%;
+      }
     </style>
-    <!-- Add Monaco Editor's script -->
     <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
     <script>
       require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' }});
       require(['vs/editor/editor.main'], function() {
-        // Create the Monaco Editor instance
         window.editor = monaco.editor.create(document.getElementById('monaco-editor'), {
           value: '',
           language: 'javascript',
@@ -43,14 +44,14 @@
         });
       });
     </script>
-    <script type="module" crossorigin src="./assets/index-fea05577.js"></script>
+    <script type="module" crossorigin src="./assets/index-4a25b836.js"></script>
     <link rel="stylesheet" href="./assets/index-8a043bf9.css">
   </head>
   <body>
     <div id="app">
       <div id="editor">
         <h2>Code Editor</h2>
-        <div id="monaco-editor" style="height: 90%;"></div>
+        <div id="monaco-editor"></div>
       </div>
       <div id="preview">
         <h2>Next.js Preview</h2>
