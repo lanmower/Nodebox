@@ -28,16 +28,28 @@ async function init() {
     // On the index page, let's illustrate how server-side props
     // propagate to your page component in Next.js.
     "pages/index.jsx": `
+import styles from '../styles/Home.module.css';
+
 export default function Homepage({ name }) {
   return (
-    <div>
-      <h1>Hello, {name}</h1>
-      <p>The name "{name}" has been received from server-side props.</p>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>Welcome to My Fancy Demo!</h1>
+      </header>
+      <main className={styles.main}>
+        <h2>Hello, {name}</h2>
+        <p className={styles.description}>
+          The name "{name}" has been received from server-side props.
+        </p>
+      </main>
+      <footer className={styles.footer}>
+        <p>Powered by Next.js</p>
+      </footer>
     </div>
   )
 }
 
-export function getServerSideProps() {
+export async function getServerSideProps() {
   return {
     props: {
       name: 'John'
@@ -45,7 +57,52 @@ export function getServerSideProps() {
   }
 }
     `,
-  });
+    "styles/Home.module.css": `
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #f0e7f4, #e2e2e2);
+  padding: 20px;
+}
+
+.header {
+  background: #6a4eae;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
+  width: 100%;
+}
+
+.title {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+.main {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.description {
+  border-top: 1px solid #6a4eae;
+  padding: 10px;
+  margin-top: 10px;
+  color: #333;
+}
+
+.footer {
+  margin-top: auto;
+  padding: 20px;
+  text-align: center;
+  font-size: 0.875rem;
+}
+    `,
+});
   // Create a shell where we will be running Next.js.
   const shell = runtime.shell.create();
 
