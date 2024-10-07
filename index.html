@@ -5,62 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
     <link rel="stylesheet" href="./styles.css" />
-    <script src="https://unpkg.com/monaco-editor/min/vs/loader.js"></script>
     <style>
       #editor {
-        height: 400px;
+        height: 200px;
         width: 100%;
         border: 1px solid #ccc;
-      }
-      #file-list {
-        margin: 20px 0;
+        font-family: monospace;
+        padding: 10px;
       }
     </style>
   </head>
   <body>
     <div id="app">
-      <h2>Next.js Preview with Monaco Editor</h2>
-      <p>Below, you can see an actual Next.js project running directly in your browser.</p>
+      <h2>Next.js preview</h2>
+      <p>
+        Below, you can see an actual Next.js project running directly in your
+        browser.
+      </p>
       <iframe id="nodebox-iframe" style="display:none"></iframe>
       <iframe id="preview-iframe" width="100%" height="250"></iframe>
-
-      <div id="file-list">
-        <h3>Files</h3>
-        <ul id="files"></ul>
-        <input type="text" id="file-name" placeholder="New file name" />
-        <button id="add-file">Add File</button>
-        <button id="remove-file">Remove File</button>
-      </div>
-
+      
+      <p align="center">Learn more about <a href="https://github.com/codesandbox/nodebox-runtime">Nodebox</a>.</p>
+      
+      <h3>Code Editor</h3>
       <div id="editor"></div>
-
-      <p align="center">
-        Learn more about <a href="https://github.com/codesandbox/nodebox-runtime">Nodebox</a>.
-      </p>
     </div>
-
+    
     <script type="module">
       import { Nodebox } from "@codesandbox/nodebox";
 
       const previewIframe = document.getElementById("preview-iframe");
-      const editorDiv = document.getElementById("editor");
-      const filesUl = document.getElementById("files");
-      const fileNameInput = document.getElementById("file-name");
-      const addFileButton = document.getElementById("add-file");
-      const removeFileButton = document.getElementById("remove-file");
+      const editor = document.getElementById("editor");
 
-      let currentFile = "pages/index.jsx";
-      const fileContents = {
-        "package.json": JSON.stringify({
-          name: "nextjs-preview",
-          dependencies: {
-            "@next/swc-wasm-nodejs": "12.1.6",
-            next: "12.1.6",
-            react: "18.2.0",
-            "react-dom": "18.2.0",
-          },
-        }),
-        "pages/index.jsx": `
+      async function init() {
+        const runtime = new Nodebox({
+          iframe: document.getElementById("nodebox-iframe"),
+        });
+
+        await runtime.connect();
+
+        const files = {
+          "package.json": JSON.stringify({
+            name: "nextjs-preview",
+            dependencies: {
+              "@next/swc-wasm-nodejs": "12.1.6",
+              next: "12.1.6",
+              react: "18.2.0",
+              "react-dom": "18.2.0",
+            },
+          }),
+          "pages/index.jsx": `
 export default function Homepage({ name }) {
   return (
     <div>
@@ -77,72 +71,18 @@ export function getServerSideProps() {
     }
   }
 }
-        `,
-      };
+          `,
+        };
 
-      async function init() {
-        const runtime = new Nodebox({
-          iframe: document.getElementById("nodebox-iframe"),
-        });
-
-        await runtime.connect();
-        await runtime.fs.init(fileContents);
-        loadFileList();
-
-        await createEditor();
+        await runtime.fs.init(files);
+        
+        // Load the initial file content into the editor
+        editor.textContent = files["pages/index.jsx"];
 
         const shell = runtime.shell.create();
         const nextProcess = await shell.runCommand("next", ["dev"]);
         const previewInfo = await runtime.preview.getByShellId(nextProcess.id);
         previewIframe.setAttribute("src", previewInfo.url);
-      }
-
-      function loadFileList() {
-        filesUl.innerHTML = "";
-        Object.keys(fileContents).forEach(filename => {
-          const li = document.createElement("li");
-          li.textContent = filename;
-          li.onclick = () => loadFile(filename);
-          filesUl.appendChild(li);
-        });
-      }
-
-      function loadFile(filename) {
-        currentFile = filename;
-        editor.setValue(fileContents[filename]);
-      }
-
-      addFileButton.onclick = () => {
-        const newFileName = fileNameInput.value.trim();
-        if (newFileName) {
-          fileContents[newFileName] = ""; // Empty new file
-          loadFileList();
-          fileNameInput.value = "";
-        }
-      };
-
-      removeFileButton.onclick = () => {
-        if (fileContents[currentFile]) {
-          delete fileContents[currentFile];
-          loadFileList();
-          currentFile = Object.keys(fileContents)[0] || "";
-          if (currentFile) loadFile(currentFile);
-          else editor.setValue("");
-        }
-      };
-
-      let editor;
-      async function createEditor() {
-        require.config({ paths: { vs: "https://unpkg.com/monaco-editor/min/vs" } });
-        require(["vs/editor/editor.main"], function () {
-          editor = monaco.editor.create(editorDiv, {
-            value: fileContents[currentFile],
-            language: 'javascript',
-          });
-          editor.onDidChangeModelContent(() => {
-            fileContents[currentFile] = editor.getValue();
-          });
-        });
       }
 
       init();
