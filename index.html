@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -6,35 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
     
+    <script src="https://unpkg.com/monaco-editor/min/vs/loader.js"></script>
     <style>
       #editor {
-        height: 200px;
+        height: 400px;
         width: 100%;
         border: 1px solid #ccc;
-        font-family: monospace;
-        padding: 10px;
+      }
+      #file-list {
+        margin: 20px 0;
       }
     </style>
-    <script type="module" crossorigin src="./assets/index-41e71396.js"></script>
+    <script type="module" crossorigin src="./assets/index-e544441c.js"></script>
     <link rel="stylesheet" href="./assets/index-8a043bf9.css">
   </head>
   <body>
     <div id="app">
-      <h2>Next.js preview</h2>
-      <p>
-        Below, you can see an actual Next.js project running directly in your
-        browser.
-      </p>
+      <h2>Next.js Preview with Monaco Editor</h2>
+      <p>Below, you can see an actual Next.js project running directly in your browser.</p>
       <iframe id="nodebox-iframe" style="display:none"></iframe>
       <iframe id="preview-iframe" width="100%" height="250"></iframe>
-      
-      <p align="center">Learn more about <a href="https://github.com/codesandbox/nodebox-runtime">Nodebox</a>.</p>
-      
-      <h3>Code Editor</h3>
+
+      <div id="file-list">
+        <h3>Files</h3>
+        <ul id="files"></ul>
+        <input type="text" id="file-name" placeholder="New file name" />
+        <button id="add-file">Add File</button>
+        <button id="remove-file">Remove File</button>
+      </div>
+
       <div id="editor"></div>
+
+      <p align="center">
+        Learn more about <a href="https://github.com/codesandbox/nodebox-runtime">Nodebox</a>.
+      </p>
     </div>
-    
+
     
   </body>
 </html>
-```
