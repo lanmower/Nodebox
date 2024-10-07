@@ -30,14 +30,27 @@
         border: none;
       }
     </style>
-    <script type="module" crossorigin src="./assets/index-ad70fb71.js"></script>
+    <!-- Add Monaco Editor's script -->
+    <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
+    <script>
+      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        // Create the Monaco Editor instance
+        window.editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+          value: '',
+          language: 'javascript',
+          automaticLayout: true
+        });
+      });
+    </script>
+    <script type="module" crossorigin src="./assets/index-fea05577.js"></script>
     <link rel="stylesheet" href="./assets/index-8a043bf9.css">
   </head>
   <body>
     <div id="app">
       <div id="editor">
         <h2>Code Editor</h2>
-        <textarea rows="20" style="width: 100%;"></textarea>
+        <div id="monaco-editor" style="height: 90%;"></div>
       </div>
       <div id="preview">
         <h2>Next.js Preview</h2>
