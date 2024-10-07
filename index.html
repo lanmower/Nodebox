@@ -5,93 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
     <link rel="stylesheet" href="./styles.css" />
-    <style>
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-      }
-      #app {
-        display: flex;
-        height: 100vh;
-      }
-      #editor {
-        flex: 1;
-        padding: 20px;
-        border-right: 1px solid #ccc;
-        background-color: #f9f9f9;
-      }
-      #preview {
-        flex: 2;
-        padding: 20px;
-      }
-      #preview-iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-      }
-      #monaco-editor {
-        height: 90%;
-      }
-    </style>
-    <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
-    <script>
-      require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' }});
-      require(['vs/editor/editor.main'], function() {
-        window.editor = monaco.editor.create(document.getElementById('monaco-editor'), {
-          value: '',
-          language: 'javascript',
-          automaticLayout: true
-        });
-      });
-    </script>
   </head>
   <body>
     <div id="app">
-      <div id="editor">
-        <h2>Code Editor</h2>
-        <div id="monaco-editor"></div>
-      </div>
-      <div id="preview">
-        <h2>Next.js Preview</h2>
-        <p>
-          Below, you can see an actual Next.js project running directly in your
-          browser.
-        </p>
-        <iframe id="preview-iframe"></iframe>
-      </div>
+      <h2>Next.js preview</h2>
+      <p>
+        Below, you can see an actual Next.js project running directly in your
+        browser.
+      </p>
+      <iframe id="nodebox-iframe" style="display:none"></iframe>
+      <iframe id="preview-iframe" width="100%" height="250"></iframe>
+      
+      <p align="center">Learn more about <a href="https://github.com/codesandbox/nodebox-runtime">Nodebox</a>.</p>
     </div>
     
-    <p align="center">
-      Learn more about <a href="https://github.com/codesandbox/nodebox-runtime">Nodebox</a>.
-    </p>
-
-    <script type="module">
+    <script type="module" >
       import { Nodebox } from "@codesandbox/nodebox";
 
-      const previewIframe = document.getElementById("preview-iframe");
+const previewIframe = document.getElementById("preview-iframe");
 
-      async function init() {
-        // Create a new Nodebox runtime to evaluate Node.js code.
-        const runtime = new Nodebox({
-          // Correctly reference the preview iframe here
-          iframe: previewIframe,
-        });
+async function init() {
+  // Create a new Nodebox runtime to evaluate Node.js code.
+  const runtime = new Nodebox({
+    // Provide a reference to the iframe on the page
+    // that will mount the Nodebox runtime, allowing it to
+    // communicate with the rest of the application.
+    iframe: document.getElementById("nodebox-iframe"),
+  });
 
-        // Establish a connection to the runtime.
-        await runtime.connect();
+  // Establish a connection to the runtime.
+  await runtime.connect();
 
-        // Populate the file system with a Next.js project.
-        await runtime.fs.init({
-          "package.json": JSON.stringify({
-            name: "nextjs-preview",
-            dependencies: {
-              "@next/swc-wasm-nodejs": "12.1.6",
-              next: "12.1.6",
-              react: "18.2.0",
-              "react-dom": "18.2.0",
-            },
-          }),
-          "pages/index.jsx": `
+  // Populate the file system with a Next.js project.
+  await runtime.fs.init({
+    "package.json": JSON.stringify({
+      name: "nextjs-preview",
+      dependencies: {
+        "@next/swc-wasm-nodejs": "12.1.6",
+        next: "12.1.6",
+        react: "18.2.0",
+        "react-dom": "18.2.0",
+      },
+    }),
+    // On the index page, let's illustrate how server-side props
+    // propagate to your page component in Next.js.
+    "pages/index.jsx": `
 export default function Homepage({ name }) {
   return (
     <div>
@@ -108,27 +66,21 @@ export function getServerSideProps() {
     }
   }
 }
-          `,
-        });
+    `,
+  });
+  // Create a shell where we will be running Next.js.
+  const shell = runtime.shell.create();
 
-        // Create a shell where we will be running Next.js.
-        const shell = runtime.shell.create();
+  // Start the Next.js development server.
+  const nextProcess = await shell.runCommand("next", ["dev"]);
 
-        // Start the Next.js development server.
-        const nextProcess = await shell.runCommand("next", ["dev"]);
+  // Assign the preview URL for Next.js development server
+  // to the preview iframe on the page.
+  const previewInfo = await runtime.preview.getByShellId(nextProcess.id);
+  previewIframe.setAttribute("src", previewInfo.url);
+}
 
-        // Assign the preview URL for the Next.js development server
-        const previewInfo = await runtime.preview.getByShellId(nextProcess.id);
-        previewIframe.setAttribute("src", previewInfo.url);
-
-        // Listen for editor content changes and update file
-        window.editor.onDidChangeModelContent(() => {
-          const code = window.editor.getValue();
-          runtime.fs.writeFile("pages/index.jsx", code);
-        });
-      }
-
-      init();
+init();
     </script>
   </body>
 </html>
