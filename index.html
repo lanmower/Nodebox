@@ -5,52 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@monaco-editor/react@latest/dist/monaco-editor.css" />
+    <style>
+  
+    </style>
   </head>
   <body>
     <div id="app">
-      <h2>Next.js preview</h2>
-      <p>
-        Below, you can see an actual Next.js project running directly in your
-        browser.
-      </p>
-      <iframe id="nodebox-iframe" style="display:none"></iframe>
-      <iframe id="preview-iframe" width="100%" height="250"></iframe>
-      
+      <div id="file-manager">
+        <button id="add-file">Add File</button>
+        <button id="remove-file">Remove File</button>
+        <button id="rename-file">Rename File</button>
+      </div>
+      <div id="container">
+        <div id="editor-container">
+          <ul id="file-list"></ul>
+          <div id="editor"></div>
+        </div>
+        <div id="preview-container">
+          <iframe id="preview-iframe"></iframe>
+          <iframe id="nodebox-iframe"></iframe>
+        </div>
+      </div>
       <p align="center">Learn more about <a href="https://github.com/codesandbox/nodebox-runtime">Nodebox</a>.</p>
     </div>
     
-    <script type="module" >
-      
-import { Nodebox } from "@codesandbox/nodebox";
+    <script type="module">
+      import { Nodebox } from "@codesandbox/nodebox";
+      import * as monaco from 'monaco-editor';
 
-const previewIframe = document.getElementById("preview-iframe");
-
-async function init() {
-  // Create a new Nodebox runtime to evaluate Node.js code.
-  const runtime = new Nodebox({
-    // Provide a reference to the iframe on the page
-    // that will mount the Nodebox runtime, allowing it to
-    // communicate with the rest of the application.
-    iframe: document.getElementById("nodebox-iframe"),
-  });
-
-  // Establish a connection to the runtime.
-  await runtime.connect();
-
-  // Populate the file system with a Next.js project.
-  await runtime.fs.init({
-    "package.json": JSON.stringify({
-      name: "nextjs-preview",
-      dependencies: {
-        "@next/swc-wasm-nodejs": "12.1.6",
-        next: "12.1.6",
-        react: "18.2.0",
-        "react-dom": "18.2.0",
-      },
-    }),
-    // On the index page, let's illustrate how server-side props
-    // propagate to your page component in Next.js.
-    "pages/index.jsx": `
+      const previewIframe = document.getElementById("preview-iframe");
+      const initialFiles = {
+        "package.json": JSON.stringify({
+          name: "nextjs-preview",
+          dependencies: {
+            "@next/swc-wasm-nodejs": "12.1.6",
+            next: "12.1.6",
+            react: "18.2.0",
+            "react-dom": "18.2.0",
+          },
+        }),
+        "pages/index.jsx": `
 export default function Homepage({ name }) {
   return (
     <div>
@@ -67,22 +62,117 @@ export function getServerSideProps() {
     }
   }
 }
-    `,
-  });
-  // Create a shell where we will be running Next.js.
-  const shell = runtime.shell.create();
+        `,
+      };
+      let runtime;
+      let currentFileName = "pages/index.jsx"; // Track the current file name
+      const editor = monaco.editor.create(document.getElementById("editor"), {
+        value: initialFiles[currentFileName], // Populate editor with initial file content
+        language: 'javascript',
+        automaticLayout: true
+      });
 
-  // Start the Next.js development server.
-  const nextProcess = await shell.runCommand("next", ["dev"]);
+      // Debounce function to synchronize the code editor with the runtime's filesystem
+      let debounceTimeout;
+      const debounceDelay = 2000; // 2 seconds
 
-  // Assign the preview URL for Next.js development server
-  // to the preview iframe on the page.
-  const previewInfo = await runtime.preview.getByShellId(nextProcess.id);
-  previewIframe.setAttribute("src", previewInfo.url);
-}
+      function debounceWriteFile(path, content) {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(async () => {
+          await runtime.fs.writeFile(path, content);
+        }, debounceDelay);
+      }
 
-init();
+      async function init() {
+        runtime = new Nodebox({
+          iframe: document.getElementById("nodebox-iframe"),
+        });
 
+        await runtime.connect();
+
+        // Populate the file system with the initial files
+        await runtime.fs.init(initialFiles);
+
+        // Populate the file list
+        const fileList = document.getElementById("file-list");
+        Object.keys(initialFiles).forEach(fileName => {
+          const li = document.createElement("li");
+          li.textContent = fileName;
+          li.onclick = () => {
+            // Save current file content before switching
+            initialFiles[currentFileName] = editor.getValue();
+            currentFileName = fileName; // Update current file name
+            editor.setValue(initialFiles[currentFileName]); // Load new file content into editor
+          };
+          fileList.appendChild(li);
+        });
+
+        // Listen for changes in the editor and synchronize with the runtime's filesystem
+        editor.onDidChangeModelContent(() => {
+          debounceWriteFile(`./${currentFileName}`, editor.getValue());
+        });
+
+        const shell = runtime.shell.create();
+        const nextProcess = await shell.runCommand("next", ["dev"]);
+        const previewInfo = await runtime.preview.getByShellId(nextProcess.id);
+        previewIframe.setAttribute("src", previewInfo.url);
+      }
+
+      init(); // Call init to load initialFiles when it starts
+
+      document.getElementById("add-file").addEventListener("click", () => {
+        const fileName = prompt("Enter file name:");
+        if (fileName) {
+          // Logic to add a file
+          console.log(`File ${fileName} added.`);
+          initialFiles[fileName] = ""; // Add new file to initialFiles
+          const li = document.createElement("li");
+          li.textContent = fileName;
+          li.onclick = () => {
+            // Save current file content before switching
+            initialFiles[currentFileName] = editor.getValue();
+            currentFileName = fileName; // Update current file name
+            editor.setValue(initialFiles[currentFileName]); // Load new file content into editor
+          };
+          document.getElementById("file-list").appendChild(li);
+        }
+      });
+
+      document.getElementById("remove-file").addEventListener("click", () => {
+        const fileName = prompt("Enter file name to remove:");
+        if (fileName) {
+          // Logic to remove a file
+          console.log(`File ${fileName} removed.`);
+          delete initialFiles[fileName]; // Remove from initialFiles
+          const fileList = document.getElementById("file-list");
+          const items = fileList.getElementsByTagName("li");
+          for (let i = 0; i < items.length; i++) {
+            if (items[i].textContent === fileName) {
+              fileList.removeChild(items[i]);
+              break;
+            }
+          }
+        }
+      });
+
+      document.getElementById("rename-file").addEventListener("click", () => {
+        const oldName = prompt("Enter current file name:");
+        const newName = prompt("Enter new file name:");
+        if (oldName && newName) {
+          // Logic to rename a file
+          console.log(`File ${oldName} renamed to ${newName}.`);
+          initialFiles[newName] = initialFiles[oldName]; // Copy content to new name
+          delete initialFiles[oldName]; // Remove old file
+          const fileList = document.getElementById("file-list");
+          const items = fileList.getElementsByTagName("li");
+          for (let i = 0; i < items.length; i++) {
+            if (items[i].textContent === oldName) {
+              items[i].textContent = newName; // Update displayed name
+              break;
+            }
+          }
+        }
+      });
     </script>
   </body>
 </html>
