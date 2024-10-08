@@ -18,5 +18,45 @@ iframe {
 
 #app {
   margin: 0 auto;
-  max-width: 750px;
+}
+#container {
+  display: flex;
+  height: 100vh;
+}
+#editor-container {
+  display: flex;
+  width: 100%; /* Changed to full width */
+}
+#editor {
+  flex: 1;
+  border-right: 1px solid #ccc;
+}
+#file-list {
+  width: 200px;
+  border-right: 1px solid #ccc;
+  overflow-y: auto;
+  padding: 10px;
+  list-style-type: none;
+}
+#file-list li {
+  cursor: pointer;
+  padding: 5px;
+  border: 1px solid #ccc;
+  margin: 2px 0;
+}
+#preview-container {
+  width: 30%; /* Adjusted width for the preview container */
+  display: flex;
+  flex-direction: column;
+}
+#preview-iframe {
+  flex: 1;
+  border: none;
+}
+#nodebox-iframe {
+  flex: 1;
+  border: none;
+}
+#file-manager {
+  margin: 10px;
 }
