@@ -5,15 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
     <link rel="stylesheet" href="./styles.css" />
-    <style>
-      #editor {
-        height: 200px;
-        width: 100%;
-        border: 1px solid #ccc;
-        font-family: monospace;
-        padding: 10px;
-      }
-    </style>
   </head>
   <body>
     <div id="app">
@@ -26,35 +17,39 @@
       <iframe id="preview-iframe" width="100%" height="250"></iframe>
       
       <p align="center">Learn more about <a href="https://github.com/codesandbox/nodebox-runtime">Nodebox</a>.</p>
-      
-      <h3>Code Editor</h3>
-      <div id="editor"></div>
     </div>
     
     <script type="module">
       import { Nodebox } from "@codesandbox/nodebox";
 
-      const previewIframe = document.getElementById("preview-iframe");
-      const editor = document.getElementById("editor");
+const previewIframe = document.getElementById("preview-iframe");
 
-      async function init() {
-        const runtime = new Nodebox({
-          iframe: document.getElementById("nodebox-iframe"),
-        });
+async function init() {
+  // Create a new Nodebox runtime to evaluate Node.js code.
+  const runtime = new Nodebox({
+    // Provide a reference to the iframe on the page
+    // that will mount the Nodebox runtime, allowing it to
+    // communicate with the rest of the application.
+    iframe: document.getElementById("nodebox-iframe"),
+  });
 
-        await runtime.connect();
+  // Establish a connection to the runtime.
+  await runtime.connect();
 
-        const files = {
-          "package.json": JSON.stringify({
-            name: "nextjs-preview",
-            dependencies: {
-              "@next/swc-wasm-nodejs": "12.1.6",
-              next: "12.1.6",
-              react: "18.2.0",
-              "react-dom": "18.2.0",
-            },
-          }),
-          "pages/index.jsx": `
+  // Populate the file system with a Next.js project.
+  await runtime.fs.init({
+    "package.json": JSON.stringify({
+      name: "nextjs-preview",
+      dependencies: {
+        "@next/swc-wasm-nodejs": "12.1.6",
+        next: "12.1.6",
+        react: "18.2.0",
+        "react-dom": "18.2.0",
+      },
+    }),
+    // On the index page, let's illustrate how server-side props
+    // propagate to your page component in Next.js.
+    "pages/index.jsx": `
 export default function Homepage({ name }) {
   return (
     <div>
@@ -71,21 +66,21 @@ export function getServerSideProps() {
     }
   }
 }
-          `,
-        };
+    `,
+  });
+  // Create a shell where we will be running Next.js.
+  const shell = runtime.shell.create();
 
-        await runtime.fs.init(files);
-        
-        // Load the initial file content into the editor
-        editor.textContent = files["pages/index.jsx"];
+  // Start the Next.js development server.
+  const nextProcess = await shell.runCommand("next", ["dev"]);
 
-        const shell = runtime.shell.create();
-        const nextProcess = await shell.runCommand("next", ["dev"]);
-        const previewInfo = await runtime.preview.getByShellId(nextProcess.id);
-        previewIframe.setAttribute("src", previewInfo.url);
-      }
+  // Assign the preview URL for Next.js development server
+  // to the preview iframe on the page.
+  const previewInfo = await runtime.preview.getByShellId(nextProcess.id);
+  previewIframe.setAttribute("src", previewInfo.url);
+}
 
-      init();
+init();
     </script>
   </body>
 </html>
