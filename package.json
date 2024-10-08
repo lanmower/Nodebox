@@ -5,8 +5,10 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^4.0.0",
-    "@codesandbox/nodebox": "0.1.0"
+    "@codesandbox/nodebox": "0.1.0",
+    "vite": "^4.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "monaco-editor": "^0.52.0"
+  }
 }
