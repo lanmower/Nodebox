@@ -1,0 +1,66 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  release:
+    types: [ published ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for debug purposes
+
+    - name: Use Node.js 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Debug Node.js and npm versions
+      run: |
+        echo "Node.js version: $(node -v)"
+        echo "npm version: $(npm -v)"
+        echo "Current working directory: $(pwd)"
+        echo "List files in the working directory:"
+        ls -la
+
+    - name: Install dependencies
+      run: |
+        echo "Running npm install..."
+        npm install
+
+    - name: List files after install
+      run: |
+        echo "List files after npm install:"
+        ls -la
+
+    - name: Build project with relative base
+      run: |
+        echo "Running npm run build..."
+        npm run build --if-present -- --base=./
+
+    - name: List dist directory
+      run: |
+        echo "List files in dist directory after build:"
+        ls -la dist
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist  # Path to the built static files
+        publish_branch: gh-pages  # The branch to deploy to
+        allow_empty_commit: true  # Allow empty commits if no changes are detected
